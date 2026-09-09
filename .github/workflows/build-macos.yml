@@ -71,25 +71,33 @@ jobs:
           echo "x86_64 binary info:"
           file "dist/x86_64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos"
 
-      - name: Package arm64
+      - name: Package arm64 (DMG)
         run: |
-          cd dist/arm64
-          zip -r "../../VoidTerminal-macOS-arm64.zip" "void_terminal_macos.app"
-          cd ../..
+          mkdir -p dist/dmg-arm64
+          cp -R "dist/arm64/void_terminal_macos.app" "dist/dmg-arm64/"
+          ln -s /Applications "dist/dmg-arm64/Applications"
+          hdiutil create -volname "VoidTerminal" -srcfolder "dist/dmg-arm64" \
+            -ov -format UDZO "VoidTerminal-macOS-arm64.dmg"
+          echo "arm64 DMG created:"
+          ls -lh "VoidTerminal-macOS-arm64.dmg"
 
-      - name: Package x86_64
+      - name: Package x86_64 (DMG)
         run: |
-          cd dist/x86_64
-          zip -r "../../VoidTerminal-macOS-x86_64.zip" "void_terminal_macos.app"
-          cd ../..
+          mkdir -p dist/dmg-x64
+          cp -R "dist/x86_64/void_terminal_macos.app" "dist/dmg-x64/"
+          ln -s /Applications "dist/dmg-x64/Applications"
+          hdiutil create -volname "VoidTerminal" -srcfolder "dist/dmg-x64" \
+            -ov -format UDZO "VoidTerminal-macOS-x86_64.dmg"
+          echo "x86_64 DMG created:"
+          ls -lh "VoidTerminal-macOS-x86_64.dmg"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: VoidTerminal-macOS-builds
           path: |
-            VoidTerminal-macOS-arm64.zip
-            VoidTerminal-macOS-x86_64.zip
+            VoidTerminal-macOS-arm64.dmg
+            VoidTerminal-macOS-x86_64.dmg
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -117,15 +125,15 @@ jobs:
             - 管理员功能
 
             ### 下载
-            - **Apple Silicon (M1/M2/M3/M4)**: `VoidTerminal-macOS-arm64.zip`
-            - **Intel Mac**: `VoidTerminal-macOS-x86_64.zip`
+            - **Apple Silicon (M1/M2/M3/M4)**: `VoidTerminal-macOS-arm64.dmg`
+            - **Intel Mac**: `VoidTerminal-macOS-x86_64.dmg`
 
             ### 安装
-            1. 下载对应架构的 zip
-            2. 解压后将 `void_terminal_macos.app` 拖入「应用程序」
+            1. 下载对应架构的 dmg
+            2. 双击打开，将 `void_terminal_macos.app` 拖入「Applications」
             3. 首次打开如遇安全提示，右键 → 打开
           files: |
-            VoidTerminal-macOS-arm64.zip
-            VoidTerminal-macOS-x86_64.zip
+            VoidTerminal-macOS-arm64.dmg
+            VoidTerminal-macOS-x86_64.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
