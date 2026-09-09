@@ -1,0 +1,120 @@
+name: Build macOS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build macOS (universal)
+        run: flutter build macos --release
+
+      - name: Thin arm64 binary
+        run: |
+          APP="build/macos/Build/Products/Release/void_terminal_macos.app"
+          mkdir -p dist/arm64
+          cp -R "$APP" "dist/arm64/void_terminal_macos.app"
+          # Thin main executable
+          lipo -thin arm64 "dist/arm64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos" -output /tmp/runner_arm64
+          mv /tmp/runner_arm64 "dist/arm64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos"
+          # Thin FlutterMacOS.framework if present
+          if [ -d "dist/arm64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework" ]; then
+            lipo -thin arm64 "dist/arm64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS" -output /tmp/flutter_arm64
+            mv /tmp/flutter_arm64 "dist/arm64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS"
+          fi
+          # Thin App.framework
+          if [ -f "dist/arm64/void_terminal_macos.app/Contents/Frameworks/App.framework/App" ]; then
+            lipo -thin arm64 "dist/arm64/void_terminal_macos.app/Contents/Frameworks/App.framework/App" -output /tmp/app_arm64
+            mv /tmp/app_arm64 "dist/arm64/void_terminal_macos.app/Contents/Frameworks/App.framework/App"
+          fi
+          echo "arm64 binary info:"
+          file "dist/arm64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos"
+
+      - name: Thin x86_64 binary
+        run: |
+          APP="build/macos/Build/Products/Release/void_terminal_macos.app"
+          mkdir -p dist/x86_64
+          cp -R "$APP" "dist/x86_64/void_terminal_macos.app"
+          lipo -thin x86_64 "dist/x86_64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos" -output /tmp/runner_x64
+          mv /tmp/runner_x64 "dist/x86_64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos"
+          if [ -d "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework" ]; then
+            lipo -thin x86_64 "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS" -output /tmp/flutter_x64
+            mv /tmp/flutter_x64 "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS"
+          fi
+          if [ -f "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/App.framework/App" ]; then
+            lipo -thin x86_64 "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/App.framework/App" -output /tmp/app_x64
+            mv /tmp/app_x64 "dist/x86_64/void_terminal_macos.app/Contents/Frameworks/App.framework/App"
+          fi
+          echo "x86_64 binary info:"
+          file "dist/x86_64/void_terminal_macos.app/Contents/MacOS/void_terminal_macos"
+
+      - name: Package arm64
+        run: |
+          cd dist/arm64
+          zip -r "../../VoidTerminal-macOS-arm64.zip" "void_terminal_macos.app"
+          cd ../..
+
+      - name: Package x86_64
+        run: |
+          cd dist/x86_64
+          zip -r "../../VoidTerminal-macOS-x86_64.zip" "void_terminal_macos.app"
+          cd ../..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: VoidTerminal macOS v1.0.0
+          body: |
+            ## 虚空终端 macOS 版 v1.0.0
+
+            支持 Apple Silicon (arm64) 和 Intel (x86_64) 双架构。
+
+            ### 功能
+            - 登录/注册（密码 + TOTP 验证码）
+            - 公共大厅聊天
+            - 好友私聊
+            - 群聊（创建/管理/加群）
+            - 好友列表/通讯录
+            - 朋友圈/动态
+            - 消息撤回
+            - @提及
+            - 图片发送
+            - 搜索群聊/加群
+            - 日间/夜间模式
+            - 两步验证 (2FA)
+            - 管理员功能
+
+            ### 下载
+            - **Apple Silicon (M1/M2/M3/M4)**: `VoidTerminal-macOS-arm64.zip`
+            - **Intel Mac**: `VoidTerminal-macOS-x86_64.zip`
+
+            ### 安装
+            1. 下载对应架构的 zip
+            2. 解压后将 `void_terminal_macos.app` 拖入「应用程序」
+            3. 首次打开如遇安全提示，右键 → 打开
+          files: |
+            VoidTerminal-macOS-arm64.zip
+            VoidTerminal-macOS-x86_64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
