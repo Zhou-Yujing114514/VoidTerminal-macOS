@@ -102,12 +102,20 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: VoidTerminal macOS v1.0.0
+          tag_name: v2.1.0
+          name: VoidTerminal macOS v2.1.0
           body: |
-            ## 虚空终端 macOS 版 v1.0.0
+            ## 虚空终端 macOS 版 v2.1.0
 
             支持 Apple Silicon (arm64) 和 Intel (x86_64) 双架构。
+
+            ### 本次更新
+            - 强制使用 HTTPS / WSS 加密连接
+            - 消息图片、头像启用磁盘缓存
+            - WebSocket 断线指数退避自动重连 + 重连状态指示
+            - 消息发送防抖，避免连点重复发送
+            - 修复密钥复制、清理无用依赖
+            - 补全 MIT LICENSE
 
             ### 功能
             - 登录/注册（密码 + TOTP 验证码）

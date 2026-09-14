@@ -71,6 +71,24 @@ class _HomeViewState extends State<HomeView> {
               ),
             ],
           ),
+          // 网络断开/重连指示
+          if (!app.serverConnected && app.token != null)
+            Positioned(
+              bottom: 16,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.vtRed.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text('正在重连…',
+                      style: TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+              ),
+            ),
           // 全局 toast
           if (app.toast != null)
             Positioned(

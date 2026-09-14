@@ -158,8 +158,7 @@ class _MomentCard extends StatelessWidget {
               runSpacing: 6,
               children: moment.images.map((u) => ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.network(app.config.resourceUrlFor(u), width: 120, height: 120, fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(width: 120, height: 120, color: AppColors.vtBorder, child: const Icon(Icons.broken_image, color: AppColors.vtMuted))),
+                child: VtNetworkImage(url: app.config.resourceUrlFor(u), width: 120, height: 120),
               )).toList(),
             ),
           ],

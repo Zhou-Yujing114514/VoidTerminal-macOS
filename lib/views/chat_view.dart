@@ -73,12 +73,6 @@ class _ChatViewState extends State<ChatView> {
     final muted = AppColors.vtMuted;
     final isGroup = widget.room.type == 'group';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scroll.hasClients && msgs.isNotEmpty) {
-        // 新消息时滚动到底部
-      }
-    });
-
     return Column(
       children: [
         Container(
@@ -245,16 +239,7 @@ class _MessageBubble extends StatelessWidget {
                       final url = u.startsWith('http') ? u : '$baseUrl$u';
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          url,
-                          width: 160,
-                          height: 160,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 160, height: 160, color: AppColors.vtBorder,
-                            child: const Icon(Icons.broken_image, color: AppColors.vtMuted),
-                          ),
-                        ),
+                        child: VtNetworkImage(url: url, width: 160, height: 160),
                       );
                     }).toList(),
                   ),

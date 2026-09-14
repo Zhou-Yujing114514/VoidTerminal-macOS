@@ -42,6 +42,11 @@ class AppState extends ChangeNotifier {
   String currentUserId = '';
   String currentUserName = '我';
 
+  /// 与服务器 WebSocket 是否处于已连接（收到 hello）状态
+  bool serverConnected = false;
+  bool _hadConnected = false;
+  DateTime? _lastSentAt;
+
   AppState() {
     _setupCallbacks();
   }
@@ -102,6 +107,14 @@ class AppState extends ChangeNotifier {
     ws.onBanned = (err) { showToast(err); token = null; currentUser = null; notifyListeners(); };
     ws.onKicked = (err) { showToast(err); token = null; currentUser = null; notifyListeners(); };
     ws.onSystem = showToast;
+    ws.onDisconnect = () {
+      serverConnected = false;
+      notifyListeners();
+      // 非手动登出时提示后台重连（登出时 token 已清空，ws 内部不会再触发重连）
+      if (token != null) {
+        showToast('连接断开，正在后台自动重连…');
+      }
+    };
     ws.onPresence = (ids) { onlineUsers = ids.toSet(); notifyListeners(); };
     ws.onAnnouncementUpdate = (ann) { if (ann.isNotEmpty) announcement = ann; notifyListeners(); };
     ws.onFriendRequest = (req) {
@@ -143,6 +156,11 @@ class AppState extends ChangeNotifier {
   }
 
   void _handleHello(HelloMessage msg) {
+    // 连接真正建立
+    final wasOffline = serverConnected == false && _hadConnected;
+    serverConnected = true;
+    _hadConnected = true;
+    if (wasOffline) showToast('已重新连接');
     if (msg.selfUser != null) {
       currentUserName = msg.selfUser!.username;
       currentUserId = msg.selfUser!.id;
@@ -184,6 +202,10 @@ class AppState extends ChangeNotifier {
   void sendMessage(String text, {List<String> images = const []}) {
     final room = currentRoom;
     if (room == null || (text.isEmpty && images.isEmpty)) return;
+    // 发送防抖：600ms 内的重复触发直接忽略，避免连点发送按钮造成重复消息
+    final now = DateTime.now();
+    if (_lastSentAt != null && now.difference(_lastSentAt!).inMilliseconds < 600) return;
+    _lastSentAt = now;
     final tempId = 'temp_${DateTime.now().microsecondsSinceEpoch}';
     final now = DateTime.now().millisecondsSinceEpoch;
     final tempMsg = ChatMessage(
@@ -274,6 +296,7 @@ class AppState extends ChangeNotifier {
     token = null;
     currentUser = null;
     isAdmin = false;
+    serverConnected = false;
     globalMessages.clear();
     dmMessages.clear();
     groupMessages.clear();

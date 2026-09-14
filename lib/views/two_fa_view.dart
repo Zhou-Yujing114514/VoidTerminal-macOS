@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../app_state.dart';
@@ -232,8 +233,10 @@ class _TwoFAViewState extends State<TwoFAView> {
                       icon: const Icon(Icons.copy, size: 18),
                       color: muted,
                       onPressed: () {
-                        // 复制密钥到剪贴板
-                        // 简单实现，实际项目可使用 flutter/services 的 Clipboard
+                        // 把密钥真正复制到系统剪贴板
+                        if (_secret.isNotEmpty) {
+                          Clipboard.setData(ClipboardData(text: _secret));
+                        }
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('密钥已复制'), duration: Duration(seconds: 1)),
                         );

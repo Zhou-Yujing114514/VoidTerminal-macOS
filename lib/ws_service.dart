@@ -51,9 +51,16 @@ class WsService {
   WsService(this.config);
 
   void connect(String token) {
+    // 由 UI/登录主动发起的全新连接，重置重连计数
     _manualDisconnect = false;
     _reconnectAttempts = 0;
     _token = token;
+    _openSocket();
+  }
+
+  /// 实际建立 socket 连接。重连定时器回调时调用本方法，
+  /// 不重置 _reconnectAttempts，以便退避时间持续累积。
+  void _openSocket() {
     _disconnect();
     final uri = Uri.parse(config.wsUrl);
     try {
@@ -163,6 +170,8 @@ class WsService {
     final type = d['type'] as String?;
     switch (type) {
       case 'hello':
+        // 收到 hello 说明鉴权成功、连接真正建立，重置退避计数
+        _reconnectAttempts = 0;
         onHello?.call(HelloMessage.fromJson(d));
         break;
       case 'global':
@@ -299,7 +308,7 @@ class WsService {
     final delay = (_reconnectAttempts * 2).clamp(1, 15);
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(Duration(seconds: delay), () {
-      if (!_manualDisconnect && _token != null) connect(_token!);
+      if (!_manualDisconnect && _token != null) _openSocket();
     });
   }
 
