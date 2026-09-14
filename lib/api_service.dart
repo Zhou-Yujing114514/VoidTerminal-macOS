@@ -21,14 +21,6 @@ class ApiService {
     return data;
   }
 
-  Future<Map<String, dynamic>> _get(String path) async {
-    final resp = await http.get(Uri.parse(config.urlFor(path)));
-    if (resp.statusCode >= 400) {
-      throw ApiException('HTTP ${resp.statusCode}');
-    }
-    return jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
-  }
-
   // MARK: - Auth
   Future<Map<String, dynamic>> register(String username, String password, String password2) async {
     return _post('/api/register', {'username': username, 'password': password, 'password2': password2});

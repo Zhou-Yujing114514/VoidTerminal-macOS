@@ -203,9 +203,9 @@ class AppState extends ChangeNotifier {
     final room = currentRoom;
     if (room == null || (text.isEmpty && images.isEmpty)) return;
     // 发送防抖：600ms 内的重复触发直接忽略，避免连点发送按钮造成重复消息
-    final now = DateTime.now();
-    if (_lastSentAt != null && now.difference(_lastSentAt!).inMilliseconds < 600) return;
-    _lastSentAt = now;
+    final stamp = DateTime.now();
+    if (_lastSentAt != null && stamp.difference(_lastSentAt!).inMilliseconds < 600) return;
+    _lastSentAt = stamp;
     final tempId = 'temp_${DateTime.now().microsecondsSinceEpoch}';
     final now = DateTime.now().millisecondsSinceEpoch;
     final tempMsg = ChatMessage(
