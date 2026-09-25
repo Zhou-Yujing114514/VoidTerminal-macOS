@@ -16,7 +16,6 @@ class ProfileView extends StatelessWidget {
     final card = isDark ? AppColors.vtCard : Colors.white;
     final text = isDark ? AppColors.vtText : const Color(0xFF333333);
     final muted = AppColors.vtMuted;
-    final totpEnabled = app.currentUser?.totpEnabled == true;
 
     return Container(
       color: bg,
@@ -62,16 +61,6 @@ class ProfileView extends StatelessWidget {
                       _settingItem(context, Icons.edit_outlined, '修改用户名', () => _changeUsername(context, app)),
                       const Divider(height: 1),
                       _settingItem(context, Icons.lock_outline, '修改密码', () => _changePassword(context, app)),
-                      const Divider(height: 1),
-                      _settingItem(
-                        context,
-                        Icons.verified_user_outlined,
-                        '两步验证',
-                        () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TwoFAView())),
-                        trailing: totpEnabled
-                            ? const Icon(Icons.check_circle, color: AppColors.vtGreen, size: 18)
-                            : null,
-                      ),
                       if (app.isAdmin) ...[
                         const Divider(height: 1),
                         _settingItem(context, Icons.cleaning_services_outlined, '清空公共大厅', () => app.clearHall()),

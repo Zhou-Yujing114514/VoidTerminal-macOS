@@ -258,22 +258,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  /// TOTP 验证码登录
-  Future<String?> loginTotp(String username, String code) async {
-    try {
-      final data = await api.loginTotp(username, code);
-      token = data['token'] as String?;
-      currentUser = User.fromJson(data['user']);
-      isAdmin = currentUser?.isAdmin ?? false;
-      notifyListeners();
-      return null;
-    } on ApiException catch (e) {
-      return e.message;
-    } catch (e) {
-      return '登录失败: $e';
-    }
-  }
-
   Future<String?> register(String username, String password, String password2) async {
     try {
       final data = await api.register(username, password, password2);
@@ -306,66 +290,6 @@ class AppState extends ChangeNotifier {
     groupRequests.clear();
     currentRoom = null;
     notifyListeners();
-  }
-
-  // MARK: - 两步验证 (2FA / TOTP)
-  Future<TotpEnableResponse?> enable2FA() async {
-    final t = token;
-    if (t == null) return null;
-    try {
-      return await api.enable2FA(t);
-    } catch (e) {
-      showToast('开启失败: $e');
-      return null;
-    }
-  }
-
-  Future<bool> confirm2FA(String code) async {
-    final t = token;
-    if (t == null) return false;
-    try {
-      await api.confirm2FA(t, code);
-      if (currentUser != null) {
-        currentUser = User(
-          id: currentUser!.id,
-          username: currentUser!.username,
-          avatar: currentUser!.avatar,
-          role: currentUser!.role,
-          banned: currentUser!.banned,
-          createdAt: currentUser!.createdAt,
-          totpEnabled: true,
-        );
-      }
-      notifyListeners();
-      return true;
-    } catch (e) {
-      showToast('确认失败: $e');
-      return false;
-    }
-  }
-
-  Future<bool> disable2FA(String code) async {
-    final t = token;
-    if (t == null) return false;
-    try {
-      await api.disable2FA(t, code);
-      if (currentUser != null) {
-        currentUser = User(
-          id: currentUser!.id,
-          username: currentUser!.username,
-          avatar: currentUser!.avatar,
-          role: currentUser!.role,
-          banned: currentUser!.banned,
-          createdAt: currentUser!.createdAt,
-          totpEnabled: false,
-        );
-      }
-      notifyListeners();
-      return true;
-    } catch (e) {
-      showToast('关闭失败: $e');
-      return false;
-    }
   }
 
   // MARK: - 搜索群

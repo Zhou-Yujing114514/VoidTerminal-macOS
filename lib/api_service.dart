@@ -30,11 +30,6 @@ class ApiService {
     return _post('/api/login', {'username': username, 'password': password});
   }
 
-  /// TOTP 验证码登录（无需密码）
-  Future<Map<String, dynamic>> loginTotp(String username, String code) async {
-    return _post('/api/login-totp', {'username': username, 'code': code});
-  }
-
   Future<User> me(String token) async {
     final data = await _post('/api/me', {'token': token});
     return User.fromJson(data['user']);
@@ -42,20 +37,6 @@ class ApiService {
 
   Future<void> logout(String token) async {
     await _post('/api/logout', {'token': token});
-  }
-
-  // MARK: - 两步验证 (2FA / TOTP)
-  Future<TotpEnableResponse> enable2FA(String token) async {
-    final data = await _post('/api/2fa/enable', {'token': token});
-    return TotpEnableResponse.fromJson(data);
-  }
-
-  Future<void> confirm2FA(String token, String code) async {
-    await _post('/api/2fa/confirm', {'token': token, 'code': code});
-  }
-
-  Future<void> disable2FA(String token, String code) async {
-    await _post('/api/2fa/disable', {'token': token, 'code': code});
   }
 
   // MARK: - Avatar

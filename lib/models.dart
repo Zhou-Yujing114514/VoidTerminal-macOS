@@ -7,7 +7,6 @@ class User {
   String? role;
   bool? banned;
   int? createdAt;
-  bool? totpEnabled;
 
   User({
     required this.id,
@@ -16,7 +15,6 @@ class User {
     this.role,
     this.banned,
     this.createdAt,
-    this.totpEnabled,
   });
 
   bool get isAdmin => role == 'admin';
@@ -29,7 +27,6 @@ class User {
         role: json['role'] as String?,
         banned: json['banned'] as bool?,
         createdAt: json['createdAt'] as int? ?? json['created_at'] as int?,
-        totpEnabled: json['totpEnabled'] as bool?,
       );
 }
 
@@ -334,20 +331,5 @@ class GroupRequest {
         fromAvatar: json['fromAvatar'] as String?,
         time: json['time'] as int? ?? 0,
         status: json['status'] as String?,
-      );
-}
-
-/// TOTP 两步验证启用响应
-class TotpEnableResponse {
-  final bool ok;
-  final String? secret;
-  final String? uri;
-
-  TotpEnableResponse({required this.ok, this.secret, this.uri});
-
-  factory TotpEnableResponse.fromJson(Map<String, dynamic> json) => TotpEnableResponse(
-        ok: json['ok'] as bool? ?? false,
-        secret: json['secret'] as String?,
-        uri: json['uri'] as String?,
       );
 }
