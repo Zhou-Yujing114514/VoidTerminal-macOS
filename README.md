@@ -1,6 +1,6 @@
 # 虚空终端 macOS 版
 
-虚空终端（VoidTerminal）macOS 桌面客户端，基于 Flutter 开发，连接 buer.kdns.fr。
+虚空终端（VoidTerminal）macOS 桌面客户端，基于 Flutter 开发，连接 buer.sswwgzs.cn。
 
 ## 功能
 
@@ -26,8 +26,8 @@
 
 ## 服务器
 
-- API: `http://buer.kdns.fr/api/*`
-- WebSocket: `ws://buer.kdns.fr/ws`
+- API: `http://buer.sswwgzs.cn/api/*`
+- WebSocket: `ws://buer.sswwgzs.cn/ws`
 
 ## 本地开发
 

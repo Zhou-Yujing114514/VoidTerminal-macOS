@@ -1,6 +1,6 @@
 /// 服务器配置
 class ServerConfig {
-  static const String defaultBaseUrl = 'https://buer.kdns.fr';
+  static const String defaultBaseUrl = 'https://buer.sswwgzs.cn';
 
   String baseUrl = defaultBaseUrl;
 
