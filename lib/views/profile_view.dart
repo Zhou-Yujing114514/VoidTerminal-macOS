@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../app_state.dart';
 import '../theme.dart';
 import '../widgets.dart';
-import 'two_fa_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
